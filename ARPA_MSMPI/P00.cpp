@@ -1,6 +1,6 @@
 #include <mpi.h>
 #include <stdio.h>
-int main0(int argc, char* argv[])
+int main1(int argc, char* argv[])
 {
 	/* MPI initializers and variables */
 	int process_rank, processes_count, cpu_name_length;
