@@ -7,7 +7,7 @@
 
 #define scanf scanf_s
 
-int main(int argc, char ** argv) {
+int main1(int argc, char ** argv) {
 	/* MPI init of vars and funcions */
 	int process_rank;		// Id process
 	int processes_count;	// number of processes
