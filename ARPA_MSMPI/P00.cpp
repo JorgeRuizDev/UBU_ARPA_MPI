@@ -13,6 +13,7 @@ int main0(int argc, char* argv[])
 	/* The Main program */
 	printf("[Maquina %s]> Proceso %d de %d: Hola Mundo!\n", cpu_name, process_rank, processes_count);
 	fflush(stdout);
+	
 
 	/* Finalize the program */
 	MPI_Finalize();
