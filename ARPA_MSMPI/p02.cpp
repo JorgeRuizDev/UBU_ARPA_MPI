@@ -1,4 +1,4 @@
-
+/*
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,3 +85,4 @@ int main(int argc, char* argv[]) {
 		printf("Total time: %f\n", end_time - ini_time);
 	}
 }
+*/
