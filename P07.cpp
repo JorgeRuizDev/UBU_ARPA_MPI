@@ -1,19 +1,18 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
 #include <time.h>
-
-using namespace std;
 
 #define MAX_RANDOM_VALUE 10
 #define MIN_RANDOM_VALUE 1
 #define ETIQUETA 288
+
 #define ORIGEN 0				// Rango origen.
-#define DESTINO_SUP 1
-#define DESTINO_INF 2
-#define M 5						// Ancho matriz.
-#define N 5						// Alto matriz.
+#define DESTINO_SUP 1			// Rango matriz superior.
+#define DESTINO_INF 2			// Rango matriz inferior.
+
+#define M 12						// Ancho matriz.
+#define N 12						// Alto matriz.
 
 int* alocar_matriz(int, int);
 int* crear_matriz_aleatoria(int, int);
@@ -32,7 +31,7 @@ int main(int argc, char* argv[]) {
 
 	// Comprobación de procesos:
 	if (num_procesos != 3) {
-		cout << "Por favor, ejecute únicamente 3 copias del proceso.\n";
+		printf("Por favor, ejecute únicamente 3 copias del proceso.\n");
 		MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
 	}
 
@@ -53,9 +52,13 @@ int main(int argc, char* argv[]) {
 	int longitudes_inf[M];
 	int desplazamiento_inf[M];
 
+
 	for (int i = 0; i < M; i++) {
-		longitudes_sup[i] = longitudes_inf[M - 1 - i] = M - i;
-		desplazamiento_sup[i] = desplazamiento_inf[M - 1 - i] = i * sizeof(int);
+
+		longitudes_sup[i] = longitudes_inf[N - 1 - i] = N - i;
+		desplazamiento_inf[i] = i * N;
+		desplazamiento_sup[i] = i * N + i;
+
 	}
 
 	MPI_Type_indexed(M, longitudes_sup, desplazamiento_sup, MPI_INT, &MPI_MATRIZ_SUPERIOR);
@@ -66,28 +69,31 @@ int main(int argc, char* argv[]) {
 
 	// Creación de matrices y envío: 
 	MPI_Status estado;
+	MPI_Request peticion;
 
 	switch (rango) {
 	case ORIGEN: {
 		int* matriz = crear_matriz_aleatoria(M, N);
-		// imprimir_matriz(matriz, M, N);
-		MPI_Send(matriz, 1, MPI_MATRIZ_SUPERIOR, DESTINO_SUP, ETIQUETA, MPI_COMM_WORLD);
-		MPI_Send(matriz, 1, MPI_MATRIZ_INFERIOR, DESTINO_INF, ETIQUETA, MPI_COMM_WORLD);
-		cout << "Origen: " << endl;
+
+		MPI_Isend(matriz, 1, MPI_MATRIZ_SUPERIOR, DESTINO_SUP, ETIQUETA, MPI_COMM_WORLD, &peticion);
+		MPI_Isend(matriz, 1, MPI_MATRIZ_INFERIOR, DESTINO_INF, ETIQUETA, MPI_COMM_WORLD, &peticion);
+		printf("Origen: \n");
 		imprimir_matriz(matriz, M, N);
 		break;
 	}
 	case DESTINO_SUP: {
 		int* mitad_superior = crear_matriz_nula(M, N);
-		MPI_Recv(mitad_superior, 1, MPI_MATRIZ_SUPERIOR, ORIGEN, ETIQUETA, MPI_COMM_WORLD, &estado);
-		cout << "Superior: " << endl;
+		MPI_Irecv(mitad_superior, 1, MPI_MATRIZ_SUPERIOR, ORIGEN, ETIQUETA, MPI_COMM_WORLD, &peticion);
+		MPI_Wait(&peticion, &estado);
+		printf("Superior: \n");
 		imprimir_matriz(mitad_superior, M, N);
 		break;
 	}
 	case DESTINO_INF: {
 		int* mitad_inferior = crear_matriz_nula(M, N);
-		MPI_Recv(mitad_inferior, 1, MPI_MATRIZ_INFERIOR, ORIGEN, ETIQUETA, MPI_COMM_WORLD, &estado);
-		cout << "Inferior: " << endl;
+		MPI_Irecv(mitad_inferior, 1, MPI_MATRIZ_INFERIOR, ORIGEN, ETIQUETA, MPI_COMM_WORLD, &peticion);
+		MPI_Wait(&peticion, &estado);
+		printf("Inferior: \n");
 		imprimir_matriz(mitad_inferior, M, N);
 		break;
 	}
