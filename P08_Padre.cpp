@@ -1,4 +1,4 @@
-// ARCHIVO HIJO.
+// ARCHIVO PADRE.
 
 #include <mpi.h>
 #include <stdio.h>
